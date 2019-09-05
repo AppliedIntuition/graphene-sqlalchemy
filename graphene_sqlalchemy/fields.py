@@ -40,13 +40,18 @@ class UnsortedSQLAlchemyConnectionField(ConnectionField):
         return query
 
     @classmethod
+    def get_count(cls, query, model, info, **args):
+        if isinstance(query, Query):
+            _len = query.count()
+        else:
+            _len = len(query)
+        return _len
+
+    @classmethod
     def resolve_connection(cls, connection_type, model, info, args, resolved):
         if resolved is None:
             resolved = cls.get_query(model, info, **args)
-        if isinstance(resolved, Query):
-            _len = resolved.count()
-        else:
-            _len = len(resolved)
+        _len = cls.get_count(resolved, model, info, **args)
         connection = connection_from_list_slice(
             resolved,
             args,
